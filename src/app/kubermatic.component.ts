@@ -47,7 +47,7 @@ export class KubermaticComponent implements OnInit, OnDestroy {
     private readonly _settingsService: SettingsService,
     public router: Router,
     public googleAnalyticsService: GoogleAnalyticsService,
-    private readonly _pageTitleService: PageTitleService
+    private readonly _pageTitleService: PageTitleService,
   ) {
     this._registerRouterWatch();
   }
@@ -78,6 +78,8 @@ export class KubermaticComponent implements OnInit, OnDestroy {
     this._unsubscribe.next();
     this._unsubscribe.complete();
   }
+
+
 
   private _registerRouterWatch(): void {
     this.router.events.subscribe(event => {

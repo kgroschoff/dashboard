@@ -74,7 +74,10 @@ import {SSHKeyListComponent} from './components/ssh-key-list/ssh-key-list.compon
 import {TagListComponent} from './components/tag-list/tag-list.component';
 import {TaintFormComponent} from './components/taint-form/taint-form.component';
 import {TaintsComponent} from './components/taints/taints.component';
+import {GuidedTourStepComponent} from './components/guided-tour/step/step.component';
+import {GuidedTourArrowComponent} from './components/guided-tour/arrow/arrow.component';
 import {AutofocusDirective} from './directives/autofocus/directive';
+import {GuidedTourDirective} from './directives/guided-tour/guided-tour.directive';
 import {RelativeTimePipe} from './pipes/relativetime';
 import {MonacoEditorModule} from 'ngx-monaco-editor';
 import {ClusterService} from './services/cluster.service';
@@ -143,6 +146,8 @@ const components: any[] = [
   PropertyUsageComponent,
   FilteredComboboxComponent,
   MachineNetworkComponent,
+  GuidedTourArrowComponent,
+  GuidedTourStepComponent,
 ];
 
 const entryComponents: any[] = [
@@ -158,7 +163,7 @@ const entryComponents: any[] = [
 
 const services: any[] = [ClusterService];
 
-const directives: any[] = [AutofocusDirective, OptionDirective];
+const directives: any[] = [AutofocusDirective, OptionDirective, GuidedTourDirective];
 
 @NgModule({
   imports: [...modules],

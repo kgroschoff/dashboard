@@ -33,7 +33,7 @@ export class UserService {
   constructor(
     private readonly _httpClient: HttpClient,
     private readonly _appConfigService: AppConfigService,
-    private readonly _tokenService: TokenService
+    private readonly _tokenService: TokenService,
   ) {}
 
   init(): void {

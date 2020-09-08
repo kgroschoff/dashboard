@@ -15,6 +15,7 @@ import {merge} from 'rxjs';
 import {distinctUntilChanged, filter, takeUntil} from 'rxjs/operators';
 
 import {PresetsService} from '../../../../../../core/services';
+import {GuidedTourService} from '../../../../../../core/services/guided-tour';
 import {CloudSpec, Cluster, ClusterSpec, DigitaloceanCloudSpec} from '../../../../../../shared/entity/cluster';
 import {NodeProvider} from '../../../../../../shared/model/NodeProviderConstants';
 import {BaseFormValidator} from '../../../../../../shared/validators/base-form.validator';
@@ -46,7 +47,8 @@ export class DigitalOceanProviderBasicComponent extends BaseFormValidator implem
   constructor(
     private readonly _builder: FormBuilder,
     private readonly _presets: PresetsService,
-    private readonly _clusterService: ClusterService
+    private readonly _clusterService: ClusterService,
+    private readonly _guidedTourService: GuidedTourService
   ) {
     super('DigitalOcean Provider Basic');
   }
@@ -59,8 +61,7 @@ export class DigitalOceanProviderBasicComponent extends BaseFormValidator implem
     this.form.valueChanges
       .pipe(filter(_ => this._clusterService.provider === NodeProvider.DIGITALOCEAN))
       .pipe(takeUntil(this._unsubscribe))
-      .subscribe(_ =>
-        this._presets.enablePresets(Object.values(Controls).every(control => !this.form.get(control).value))
+      .subscribe(_ => this._presets.enablePresets(Object.values(Controls).every(control => !this.form.get(control).value))
       );
 
     this._presets.presetChanges
@@ -75,7 +76,12 @@ export class DigitalOceanProviderBasicComponent extends BaseFormValidator implem
 
     merge(this._clusterService.providerChanges, this._clusterService.datacenterChanges)
       .pipe(takeUntil(this._unsubscribe))
-      .subscribe(_ => this.form.reset());
+      .subscribe(_ => {
+        this.form.reset();
+        if (!!this._guidedTourService.isTourInProgress()) {
+          this.form.get(Controls.Token).setValue('token');
+        }
+      });
   }
 
   ngOnDestroy(): void {

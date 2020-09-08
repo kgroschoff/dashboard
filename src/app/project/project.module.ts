@@ -15,6 +15,7 @@ import {EditProjectComponent} from './edit-project/edit-project.component';
 import {ProjectRoutingModule} from './project-routing.module';
 import {ProjectComponent} from './project.component';
 
+
 const components: any[] = [ProjectComponent, EditProjectComponent];
 
 @NgModule({

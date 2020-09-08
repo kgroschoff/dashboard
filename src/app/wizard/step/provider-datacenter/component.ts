@@ -9,7 +9,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Component, forwardRef, OnDestroy, OnInit} from '@angular/core';
+import {Component, ChangeDetectionStrategy, ChangeDetectorRef, forwardRef, OnDestroy, OnInit} from '@angular/core';
 import {
   ControlValueAccessor,
   FormBuilder,
@@ -49,6 +49,7 @@ enum Controls {
       multi: true,
     },
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProviderStepComponent extends StepBase implements OnInit, ControlValueAccessor, Validator, OnDestroy {
   providers: NodeProvider[] = [];
@@ -60,7 +61,8 @@ export class ProviderStepComponent extends StepBase implements OnInit, ControlVa
     private readonly _builder: FormBuilder,
     private readonly _dcService: DatacenterService,
     private readonly _clusterService: ClusterService,
-    wizard: WizardService
+    wizard: WizardService,
+    private readonly _cdr: ChangeDetectorRef
   ) {
     super(wizard);
   }
@@ -136,5 +138,16 @@ export class ProviderStepComponent extends StepBase implements OnInit, ControlVa
     location = idx > -1 ? location.substring(idx + 1) : location;
 
     return location === datacenter.spec.location ? '' : location.trim();
+  }
+
+  selectProvider(): void {
+    this.form.get(Controls.Provider).setValue(NodeProvider.DIGITALOCEAN);
+    this._cdr.detectChanges();
+  }
+
+  selectDatacenter(): void {
+    this.form.get(Controls.Datacenter).setValue('do-fra1');
+    this._cdr.detectChanges();
+    this._wizard.stepper.next();
   }
 }

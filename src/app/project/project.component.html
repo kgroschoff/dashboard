@@ -28,7 +28,9 @@ limitations under the License.
     <button id="km-add-project-top-btn"
             mat-flat-button
             type="button"
-            (click)="addProject()">
+            (click)="addProject()"
+            kmGuidedTour="km-gt-add-project-btn"
+            (next)="addProject()">
       Add Project
     </button>
   </div>
@@ -196,7 +198,9 @@ limitations under the License.
        fxLayoutGap="20px">
 
     <mat-card *ngFor="let project of projects"
-              (click)="selectProject(project)">
+              (click)="selectProject(project)"
+              kmGuidedTour="km-gt-project-item"
+              (next)="selectProject(project)">
       <mat-card-header>
         <div mat-card-avatar
              class="km-project-cards-status">

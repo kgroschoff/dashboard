@@ -54,6 +54,8 @@ import {StepsService} from './services/wizard/steps.service';
 import {ClusterNameGenerator} from './util/name-generator.service';
 import {ThemeInformerService} from './services/theme-informer/theme-informer.service';
 import {UserPanelComponent} from './components/user-panel/user-panel.component';
+import {HelpPanelComponent} from './components/help-panel/help-panel.component';
+import {DocumentService, DomRefService, EventListenerService, GuidedTourItemsService,GuidedTourOptionsService, GuidedTourStepService, GuidedTourStepsContainerService, GuidedTourService,StepDrawerService} from './services/guided-tour';
 
 const modules: any[] = [
   CommonModule,
@@ -77,6 +79,7 @@ const components: any[] = [
   FooterComponent,
   NotificationPanelComponent,
   UserPanelComponent,
+  HelpPanelComponent,
 ];
 
 const services: any[] = [
@@ -100,6 +103,15 @@ const services: any[] = [
   ThemeInformerService,
   TokenService,
   PageTitleService,
+  DocumentService,
+  DomRefService,
+  EventListenerService,
+  GuidedTourItemsService,
+  GuidedTourOptionsService,
+  GuidedTourStepService,
+  GuidedTourStepsContainerService,
+  GuidedTourService,
+  StepDrawerService
 ];
 
 const interceptors: any[] = [

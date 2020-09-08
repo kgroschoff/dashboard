@@ -25,6 +25,7 @@ import {
   UserService,
 } from '../../core/services';
 import {SettingsService} from '../../core/services/settings/settings.service';
+import {GuidedTourService, GuidedTourItemsService} from '../../core/services/guided-tour';
 import {Addon} from '../../shared/entity/addon';
 import {Cluster, ClusterType, getClusterProvider, MasterVersion} from '../../shared/entity/cluster';
 import {View} from '../../shared/entity/common';
@@ -50,6 +51,7 @@ import {EditSSHKeysComponent} from './edit-sshkeys/edit-sshkeys.component';
 import {RevokeTokenComponent} from './revoke-token/revoke-token.component';
 import {ShareKubeconfigComponent} from './share-kubeconfig/share-kubeconfig.component';
 import {PathParam} from '../../core/services/params/params.service';
+
 
 @Component({
   selector: 'km-cluster-details',
@@ -92,7 +94,9 @@ export class ClusterDetailsComponent implements OnInit, OnDestroy {
     private readonly _api: ApiService,
     private readonly _rbacService: RBACService,
     private readonly _notificationService: NotificationService,
-    readonly settings: SettingsService
+    readonly settings: SettingsService,
+    private readonly _guidedTourService: GuidedTourService,
+    private readonly _guidedTourItemsService: GuidedTourItemsService
   ) {}
 
   ngOnInit(): void {
@@ -106,6 +110,10 @@ export class ClusterDetailsComponent implements OnInit, OnDestroy {
     this._userService
       .getCurrentUserGroup(this.projectID)
       .subscribe(userGroup => (this._currentGroupConfig = this._userService.getCurrentUserGroupConfig(userGroup)));
+
+    if (this._guidedTourService.isTourInProgress()) {
+      this._currentGroupConfig = this._userService.getCurrentUserGroupConfig('owner');
+    }  
 
     this._clusterService
       .cluster(this.projectID, clusterID, this.seed)
@@ -131,7 +139,6 @@ export class ClusterDetailsComponent implements OnInit, OnDestroy {
           this.sshKeys = keys.sort((a, b) => {
             return a.name.localeCompare(b.name);
           });
-
           this.health = health;
           this.events = events;
           this.isClusterAPIRunning = ClusterHealthStatus.isClusterAPIRunning(this.cluster, health);
@@ -194,6 +201,16 @@ export class ClusterDetailsComponent implements OnInit, OnDestroy {
           }
         }
       );
+
+      if (this._guidedTourService.isTourInProgress()) {
+        this.addons = [];
+        this.nodes = [];
+        this.machineDeployments = [this._guidedTourItemsService.guidedTourDOMachineDeployment()];
+        this.isMachineDeploymentLoadFinished = true;
+        this.upgrades = [];
+        this.clusterBindings = [];
+        this.bindings = [];
+      }
   }
 
   private _canReloadVersions(): boolean {

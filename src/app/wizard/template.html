@@ -27,27 +27,38 @@ limitations under the License.
         <ng-template matStepLabel>{{step.name}}</ng-template>
         <ng-container [ngSwitch]="step.name">
           <ng-container *ngSwitchCase="stepRegistry.Provider">
-            <km-wizard-provider-step [formControl]="form.get(stepRegistry.Provider)"></km-wizard-provider-step>
+            <km-wizard-provider-step [formControl]="form.get(stepRegistry.Provider)">
+            </km-wizard-provider-step>
           </ng-container>
 
           <ng-container *ngSwitchCase="stepRegistry.Cluster">
-            <km-wizard-cluster-step [formControl]="form.get(stepRegistry.Cluster)"></km-wizard-cluster-step>
+            <km-wizard-cluster-step [formControl]="form.get(stepRegistry.Cluster)"
+                                    kmGuidedTour="km-gt-wizard-step-cluster"
+                                    (next)="nextStep()">
+            </km-wizard-cluster-step>
           </ng-container>
 
           <ng-container *ngSwitchCase="stepRegistry.ProviderSettings">
-            <km-wizard-provider-settings-step [formControl]="form.get(stepRegistry.ProviderSettings)"></km-wizard-provider-settings-step>
+            <km-wizard-provider-settings-step [formControl]="form.get(stepRegistry.ProviderSettings)"
+                                              kmGuidedTour="km-gt-wizard-step-settings"
+                                              (next)="nextStep()">
+            </km-wizard-provider-settings-step>
           </ng-container>
 
           <ng-container *ngSwitchCase="stepRegistry.NodeSettings">
-            <km-wizard-node-settings-step [formControl]="form.get(stepRegistry.NodeSettings)"></km-wizard-node-settings-step>
+            <km-wizard-node-settings-step [formControl]="form.get(stepRegistry.NodeSettings)"
+                                          kmGuidedTour="km-gt-wizard-step-nodes"
+                                          (next)="nextStep()">
+            </km-wizard-node-settings-step>
           </ng-container>
 
           <ng-container *ngSwitchCase="stepRegistry.MachineNetwork">
-            <km-wizard-machine-network-step [formControl]="form.get(stepRegistry.MachineNetwork)"></km-wizard-machine-network-step>
+            <km-wizard-machine-network-step [formControl]="form.get(stepRegistry.MachineNetwork)">
+            </km-wizard-machine-network-step>
           </ng-container>
 
           <ng-container *ngSwitchCase="stepRegistry.Summary">
-            <km-wizard-summary-step></km-wizard-summary-step>
+            <km-wizard-summary-step kmGuidedTour="km-gt-wizard-step-summary"></km-wizard-summary-step>
           </ng-container>
         </ng-container>
 

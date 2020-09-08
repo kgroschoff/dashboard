@@ -44,6 +44,7 @@ import {AWSSize, AWSSubnet} from '../../../shared/entity/provider/aws';
 import {GCPDiskType, GCPMachineSize, GCPZone} from '../../../shared/entity/provider/gcp';
 import {OpenstackFlavor, OpenstackAvailabilityZone} from '../../../shared/entity/provider/openstack';
 import {AzureSizes, AzureZones} from '../../../shared/entity/provider/azure';
+import {GuidedTourService, GuidedTourItemsService} from '../../../core/services/guided-tour';
 
 @Injectable()
 export class ApiService {
@@ -56,12 +57,18 @@ export class ApiService {
   constructor(
     private readonly _http: HttpClient,
     private readonly _auth: Auth,
-    private readonly _appConfig: AppConfigService
+    private readonly _appConfig: AppConfigService,
+    private readonly _guidedTourItemsService: GuidedTourItemsService,
+    private readonly _guidedTourService: GuidedTourService,
   ) {
     this._token = this._auth.getBearerToken();
   }
 
   get addonConfigs(): Observable<AddonConfig[]> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of([]);
+    }
+
     if (!this._addonConfigs$) {
       this._addonConfigs$ = this._refreshTimer$
         .pipe(switchMap(() => this._http.get(`${this._restRoot}/addonconfigs`)))
@@ -77,6 +84,10 @@ export class ApiService {
     seed: string,
     projectID: string
   ): Observable<MachineDeployment> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of(this._guidedTourItemsService.guidedTourDOMachineDeployment());
+    }
+
     md.spec.template.labels = LabelFormComponent.filterNullifiedKeys(md.spec.template.labels);
     md.spec.template.taints = TaintFormComponent.filterNullifiedTaints(md.spec.template.taints);
 
@@ -86,18 +97,30 @@ export class ApiService {
 
   // NOTE: The Kubermatic API abstraction for MachineDeployments is NodeDeployments
   getMachineDeployments(cluster: string, seed: string, projectID: string): Observable<MachineDeployment[]> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of([this._guidedTourItemsService.guidedTourDOMachineDeployment()]);
+    }
+
     const url = `${this._restRoot}/projects/${projectID}/dc/${seed}/clusters/${cluster}/nodedeployments`;
     return this._http.get<MachineDeployment[]>(url).pipe(catchError(() => of<MachineDeployment[]>()));
   }
 
   // NOTE: The Kubermatic API abstraction for MachineDeployments is NodeDeployments
   getMachineDeployment(mdId: string, cluster: string, seed: string, projectID: string): Observable<MachineDeployment> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of(this._guidedTourItemsService.guidedTourDOMachineDeployment());
+    }
+
     const url = `${this._restRoot}/projects/${projectID}/dc/${seed}/clusters/${cluster}/nodedeployments/${mdId}`;
     return this._http.get<MachineDeployment>(url);
   }
 
   // NOTE: The Kubermatic API abstraction for MachineDeployments is NodeDeployments
   getMachineDeploymentNodes(mdId: string, cluster: string, seed: string, projectID: string): Observable<Node[]> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of(this._guidedTourItemsService.guidedTourDONodes());
+    }
+
     const url = `${this._restRoot}/projects/${projectID}/dc/${seed}/clusters/${cluster}/nodedeployments/${mdId}/nodes`;
     return this._http.get<Node[]>(url);
   }
@@ -109,12 +132,20 @@ export class ApiService {
     seed: string,
     projectID: string
   ): Observable<NodeMetrics[]> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of([]);
+    }
+
     const url = `${this._restRoot}/projects/${projectID}/dc/${seed}/clusters/${cluster}/nodedeployments/${mdId}/nodes/metrics`;
     return this._http.get<NodeMetrics[]>(url);
   }
 
   // NOTE: The Kubermatic API abstraction for MachineDeployments is NodeDeployments
   getMachineDeploymentNodesEvents(mdId: string, cluster: string, seed: string, projectID: string): Observable<Event[]> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of([]);
+    }
+
     const url = `${this._restRoot}/projects/${projectID}/dc/${seed}/clusters/${cluster}/nodedeployments/${mdId}/nodes/events`;
     return this._http.get<Event[]>(url);
   }
@@ -127,42 +158,73 @@ export class ApiService {
     seed: string,
     projectID: string
   ): Observable<MachineDeployment> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of(this._guidedTourItemsService.guidedTourDOMachineDeployment());
+    }
+
     const url = `${this._restRoot}/projects/${projectID}/dc/${seed}/clusters/${clusterId}/nodedeployments/${machineDeploymentId}`;
     return this._http.patch<MachineDeployment>(url, patch);
   }
 
   // NOTE: The Kubermatic API abstraction for MachineDeployments is NodeDeployments
   deleteMachineDeployment(cluster: string, md: MachineDeployment, seed: string, projectID: string): Observable<any> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of();
+    }
+
     const url = `${this._restRoot}/projects/${projectID}/dc/${seed}/clusters/${cluster}/nodedeployments/${md.id}`;
     return this._http.delete(url);
   }
 
   createProject(createProjectModel: CreateProjectModel): Observable<Project> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of(this._guidedTourItemsService.guidedTourProject());
+    }
+
     const url = `${this._restRoot}/projects`;
     return this._http.post<Project>(url, createProjectModel);
   }
 
   editProject(projectID: string, editProjectEntity: EditProject): Observable<any> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of();
+    }
+
     const url = `${this._restRoot}/projects/${projectID}`;
     return this._http.put(url, editProjectEntity);
   }
 
   getSSHKeys(projectID: string): Observable<SSHKey[]> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of([]);
+    }
     const url = `${this._restRoot}/projects/${projectID}/sshkeys`;
     return this._http.get<SSHKey[]>(url);
   }
 
   deleteSSHKey(sshkeyID: string, projectID: string): Observable<any> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of();
+    }
+
     const url = `${this._restRoot}/projects/${projectID}/sshkeys/${sshkeyID}`;
     return this._http.delete(url);
   }
 
   addSSHKey(sshKey: SSHKey, projectID: string): Observable<SSHKey> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of();
+    }
+
     const url = `${this._restRoot}/projects/${projectID}/sshkeys`;
     return this._http.post<SSHKey>(url, sshKey);
   }
 
   getDigitaloceanSizes(projectId: string, seed: string, clusterId: string): Observable<DigitaloceanSizes> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of(this._guidedTourItemsService.guidedTourDOSizes());
+    }
+
     const url = `${this._restRoot}/projects/${projectId}/dc/${seed}/clusters/${clusterId}/providers/digitalocean/sizes`;
     return this._http.get<DigitaloceanSizes>(url);
   }
@@ -246,27 +308,51 @@ export class ApiService {
   }
 
   getKubeconfigURL(projectID: string, seed: string, clusterID: string): string {
+    if (this._guidedTourService.isTourInProgress()) {
+      return '';
+    }
+
     return `${this._restRoot}/projects/${projectID}/dc/${seed}/clusters/${clusterID}/kubeconfig?token=${this._token}`;
   }
 
   getDashboardProxyURL(projectID: string, seed: string, clusterID: string): string {
+    if (this._guidedTourService.isTourInProgress()) {
+      return '';
+    }
+
     return `${this._restRoot}/projects/${projectID}/dc/${seed}/clusters/${clusterID}/dashboard/proxy`;
   }
 
   getOpenshiftProxyURL(projectID: string, seed: string, clusterID: string): string {
+    if (this._guidedTourService.isTourInProgress()) {
+      return '';
+    }
+
     return `${this._restRoot}/projects/${projectID}/dc/${seed}/clusters/${clusterID}/openshift/console/login`;
   }
 
   getShareKubeconfigURL(projectID: string, seed: string, clusterID: string, userID: string): string {
+    if (this._guidedTourService.isTourInProgress()) {
+      return '';
+    }
+
     return `${this._location}/${this._restRoot}/kubeconfig?project_id=${projectID}&datacenter=${seed}&cluster_id=${clusterID}&user_id=${userID}`;
   }
 
   getMasterVersions(type: ClusterType): Observable<MasterVersion[]> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of(this._guidedTourItemsService.guidedTourVersions());
+    }
+
     const url = `${this._restRoot}/upgrades/cluster?type=${type}`;
     return this._http.get<MasterVersion[]>(url);
   }
 
   getAdmissionPlugins(version: string): Observable<string[]> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of([]);
+    }
+
     const url = `${this._restRoot}/admission/plugins/${version}`;
     return this._http.get<string[]>(url);
   }
@@ -365,6 +451,10 @@ export class ApiService {
   }
 
   getAccessibleAddons(): Observable<string[]> {
+    if (this._guidedTourService.isTourInProgress()) {
+      return of([]);
+    }
+
     const url = `${this._restRoot}/addons`;
     return this._http.get<string[]>(url);
   }

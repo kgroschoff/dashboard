@@ -89,7 +89,7 @@ const appearance: MatFormFieldDefaultOptions = {
     CookieService,
     ProjectService,
     UserService,
-    GoogleAnalyticsService,
+    GoogleAnalyticsService
   ],
   entryComponents: [
     AddMemberComponent,

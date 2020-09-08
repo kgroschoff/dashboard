@@ -17,6 +17,7 @@ import {forkJoin, of, Subject} from 'rxjs';
 import {switchMap, takeUntil, tap} from 'rxjs/operators';
 
 import {ClusterService, DatacenterService, NotificationService, ProjectService} from '../core/services';
+import {GuidedTourService} from '../core/services/guided-tour';
 import {GoogleAnalyticsService} from '../google-analytics.service';
 import {NodeDataService} from '../node-data/service/service';
 import {Cluster} from '../shared/entity/cluster';
@@ -56,7 +57,8 @@ export class WizardComponent implements OnInit, OnDestroy {
     private readonly _nodeDataService: NodeDataService,
     private readonly _router: Router,
     private readonly _datacenterService: DatacenterService,
-    private readonly _googleAnalyticsService: GoogleAnalyticsService
+    private readonly _googleAnalyticsService: GoogleAnalyticsService,
+    private readonly _guidedTourService: GuidedTourService,
   ) {}
 
   get steps(): WizardStep[] {
@@ -104,6 +106,10 @@ export class WizardComponent implements OnInit, OnDestroy {
   }
 
   create(): void {
+    if (this._guidedTourService.isTourInProgress()) {
+      return;
+    }
+
     this.creating = true;
     let createdCluster: Cluster;
     let datacenter: Datacenter;
@@ -185,5 +191,9 @@ export class WizardComponent implements OnInit, OnDestroy {
     const controls = {};
     steps.forEach(step => (controls[step.name] = this._formBuilder.control('')));
     this.form = this._formBuilder.group(controls);
+  }
+
+  nextStep(): void {
+    this._wizard.stepper.next();
   }
 }

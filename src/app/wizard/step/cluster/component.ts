@@ -24,6 +24,7 @@ import {switchMap, takeUntil, filter} from 'rxjs/operators';
 
 import {AppConfigService} from '../../../app-config.service';
 import {ApiService, DatacenterService} from '../../../core/services';
+import {GuidedTourService, GuidedTourItemsService} from '../../../core/services/guided-tour';
 import {ClusterNameGenerator} from '../../../core/util/name-generator.service';
 import {Cluster, ClusterSpec, ClusterType, MasterVersion} from '../../../shared/entity/cluster';
 import {Datacenter} from '../../../shared/entity/datacenter';
@@ -81,7 +82,9 @@ export class ClusterStepComponent extends StepBase implements OnInit, ControlVal
     private readonly _nameGenerator: ClusterNameGenerator,
     private readonly _clusterService: ClusterService,
     private readonly _datacenterService: DatacenterService,
-    wizard: WizardService
+    private readonly _guidedTourService: GuidedTourService,
+    private readonly _guidedTourItemsService: GuidedTourItemsService,
+    wizard: WizardService,
   ) {
     super(wizard);
   }
@@ -144,6 +147,10 @@ export class ClusterStepComponent extends StepBase implements OnInit, ControlVal
       .subscribe(_ => (this._clusterService.cluster = this._getClusterEntity()));
 
     this._setDefaultClusterType();
+
+    if (!!this._guidedTourService.isTourInProgress()) {
+      this.form.get(Controls.Name).setValue(this._guidedTourItemsService.guidedTourDOCluster().name);
+    }
   }
 
   generateName(): void {

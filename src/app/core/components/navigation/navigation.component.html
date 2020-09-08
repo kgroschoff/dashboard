@@ -27,6 +27,8 @@ limitations under the License.
                          [showSidenav]="showSidenav"
                          class="project-selector"
                          fxFlex></km-project-selector>
+    <km-help-panel *ngIf="isAuthenticated()"
+                   kmGuidedTour="km-gt-help-menu"></km-help-panel>
     <km-notification-panel *ngIf="isAuthenticated()"></km-notification-panel>
     <km-user-panel *ngIf="isAuthenticated()"></km-user-panel>
   </div>
